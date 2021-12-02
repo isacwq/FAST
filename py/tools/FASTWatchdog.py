@@ -27,34 +27,23 @@ def checkIfFilesHaveBeenModified(projectPath):
     return findModifiedFiles
 
 def getTestFilesFromProject(projectPath):
-
-    baseMavenTestPath = "/src/test/java"
-
     # https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-filter-test-class-names
-    arr1 = glob.glob(projectPath + baseMavenTestPath + "/**/Test*.java", recursive = True)
-    arr2 = glob.glob(projectPath + baseMavenTestPath  + "/**/*Test.java", recursive = True)
-    arr3 = glob.glob(projectPath + baseMavenTestPath  + "/**/*Tests.java", recursive = True)
-    arr4 = glob.glob(projectPath + baseMavenTestPath  + "/**/*TestCase.java", recursive = True)
-
-    arr = arr1 + arr2 + arr3 + arr4
-
+    arr = glob.glob(f'{projectPath}/**/Test*.java', recursive=True)
+    arr.extend(glob.glob(f'{projectPath}/**/*Test.java', recursive=True))
+    arr.extend(glob.glob(f'{projectPath}/**/*Tests.java', recursive=True))
+    arr.extend(glob.glob(f'{projectPath}/**/*TestCase.java', recursive=True))
     return arr
 
 def checkDeletedFile(projectPath):
-
     projectName = os.path.basename(os.path.normpath(projectPath))
-
     indexTestFilesPaths = "{}/.fast/input/{}-indexTestFilesPaths.txt".format(projectPath, projectName)
 
-    indexTestFilesPaths
-
     if os.path.exists(indexTestFilesPaths):
-
         f2 = open(indexTestFilesPaths, "r")
         testFilesPaths = f2.readlines()
         f2.close()
 
-        testFilesFromProject  = getTestFilesFromProject(projectPath)
+        testFilesFromProject = getTestFilesFromProject(projectPath+'/**/src/test/java')
 
         testFileDeletedBeforeLastExecution = False
 

@@ -27,7 +27,7 @@ import glob
 
 import fast
 
-from tools.FASTWatchdog import checkIfFilesHaveBeenModified, checkDeletedFile
+from tools.FASTWatchdog import checkIfFilesHaveBeenModified, checkDeletedFile, getTestFilesFromProject
 
 usage = """USAGE: python3 py/prioritize.py <projectPath> <algorithm> <repetitions>
 OPTIONS:
@@ -221,22 +221,10 @@ def defineAppendWrite(fileName):
     return append_write
 
 def parameterizer(projectPath, entity):
-
     projectName = getProjectName(projectPath)
-
     fileName = "{}/.fast/input/{}-{}.txt".format(projectPath, projectName, entity)
-
     indexTestFilesPaths = "{}/.fast/input/{}-indexTestFilesPaths.txt".format(projectPath, projectName)
-
-    baseMavenTestPath = "/src/test/java"
-
-    # https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-filter-test-class-names
-    arr1 = glob.glob(projectPath + baseMavenTestPath + "/**/Test*.java", recursive = True)
-    arr2 = glob.glob(projectPath + baseMavenTestPath  + "/**/*Test.java", recursive = True)
-    arr3 = glob.glob(projectPath + baseMavenTestPath  + "/**/*Tests.java", recursive = True)
-    arr4 = glob.glob(projectPath + baseMavenTestPath  + "/**/*TestCase.java", recursive = True)
-
-    arr = arr1 + arr2 + arr3 + arr4
+    arr = getTestFilesFromProject(projectPath+'/**/src/test/java')
 
     for fileTest in arr:
 
@@ -305,4 +293,3 @@ if __name__ == "__main__":
         bboxPrioritization(algname, projectPath, v, entity, k, n, r, b, repeats, selsize)
     else:
         print('No modifications were found in the project tests')
-
