@@ -111,6 +111,7 @@ def writePrioritizationFiles(inputPath, prioritizedPath, name, ctype, run, prior
 
     f = open(indexTestFilesPaths, "r")
     lines = f.readlines()
+    f.close()
 
     priorizationTestCases = ""
 
@@ -137,6 +138,7 @@ def createPriorizationFile(prioritizedPath, projectName, ctype, run):
 
     f2 = open("{}/{}-{}-{}.txt".format(prioritizedPath, projectName, ctype, run), "r")
     lines = f2.readlines()
+    f2.close()
     linesCopy = lines
 
     imports = ""
@@ -147,9 +149,10 @@ def createPriorizationFile(prioritizedPath, projectName, ctype, run):
     while testCaseIndex < len(lines):
         imports += 'import ' + lines[testCaseIndex-1].replace('src/test/java/', '').replace('/','.').replace('.java',';')
         priorizationTestCases += '\t' + linesCopy[testCaseIndex-1].split('/')[-1].replace('.java', '.class,')
-        testCaseIndex = testCaseIndex + 1
+        testCaseIndex += 1
 
     f1.write(header+imports+midle+priorizationTestCases+footer)
+    f1.close()
 
 def writeOutput(outpath, ctype, res, javaFlag):
     if javaFlag:
@@ -238,6 +241,7 @@ def parameterizer(projectPath, entity):
         append_write = defineAppendWrite(indexTestFilesPaths)
         testFile = os.path.relpath(fileTest, projectPath) + '\n'
         openAndWriteInFile(indexTestFilesPaths, append_write, testFile)
+        f.close()
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
