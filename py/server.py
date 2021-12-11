@@ -73,54 +73,9 @@ def submit_prioritize():
         algorithm_name = post_data.get('algorithm')
         repeats = post_data.get('repetitions')
 
-
-        response_object['message'] = f'{prog_v}, {entity}, {algorithm_name}, {repeats}'
-        # fast_prioritize(prog_v, entity, algorithm_name, repeats)
+        response_object['message'] = f'{entity}, {algorithm_name}, {repeats}'
+        prioritize.run_prioritize(app.config['UPLOAD_FOLDER'], algorithm_name)
     return jsonify(response_object)
-
-
-def fast_prioritize(prog_v, entity, algorithm_name, repeats):
-    prog, v = prog_v.split('_')
-
-    directory = f'output/{prog}_{v}/'
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    directory += "prioritized/"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    # FAST parameters
-    k, n, r, b = 5, 10, 1, 10
-
-    # FAST-f sample size
-    if algorithm_name == 'FAST-all':
-        def all_(x): return x
-        selsize = all_
-    elif algorithm_name == 'FAST-sqrt':
-        def sqrt_(x): return int(math.sqrt(x)) + 1
-        selsize = sqrt_
-    elif algorithm_name == 'FAST-log':
-        def log_(x): return int(math.log(x, 2)) + 1
-        selsize = log_
-    elif algorithm_name == 'FAST-one':
-        def one_(x): return 1
-        selsize = one_
-    else:
-        def pw(x): pass
-        selsize = pw
-    
-    stdout = sys.stdout
-    sys.stdout = io.StringIO()
-
-    if entity == "bbox":
-        prioritize.bboxPrioritization(algorithm_name, prog, v, entity, k, n, r, b, repeats, selsize)
-    else:
-        prioritize.wboxPrioritization(algorithm_name, prog, v, entity, n, r, b, repeats, selsize)
-
-    output = sys.stdout.getvalue()
-    sys.stdout = stdout
-
-    return output
 
 
 if __name__ == '__main__':
