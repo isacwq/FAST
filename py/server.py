@@ -45,7 +45,7 @@ def submit_prioritize():
         print(prog_v, entity, algname, repeats)
 
         response_object['message'] = f'{prog_v}, {entity}, {algname}, {repeats}'
-        # fast_prioritize(prog_v, entity, algname, repeats)
+        prioritize.run_prioritize(prog_v, algname)
     return jsonify(response_object)
 
 
