@@ -1,34 +1,66 @@
-import sys
+import io
 import math
 import os
-import io
+import pathlib
+import sys
 
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 
 import prioritize
 
-template_dir = os.path.abspath('..\\templates\\')
-print(template_dir)
 app = Flask(__name__)
+
+# CORS CONFIG
 Cors = CORS(app)
 CORS(app, resources={r'/*': {'origins': '*'}}, CORS_SUPPORTS_CREDENTIALS=True)
+
+# APP CONFIG
 app.config['CORS_HEADERS'] = 'Content-Type'
-print(app.template_folder)
+
+app.config['ROOT_FOLDER'] = os.path.abspath(os.path.dirname(__file__))
+app.config['UPLOAD_FOLDER'] = f'{app.config["ROOT_FOLDER"]}/uploads'
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return render_template('main_form.html')
+def delete_folder_content(folder: pathlib.Path) -> None:
+    """
+    Deletes the content of the given folder.
+    """
+    for file_name in os.listdir(folder):
+        file_path = os.path.join(folder, file_name)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+        except Exception as exception:
+            print(f'Failed to delete {file_path}. Reason: {exception}')
+
+def setup_folder(folder: pathlib.Path) -> None:
+    """
+    Sets up the given folder.
+    """
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+
+    delete_folder_content(folder)
+
+def setup_folders() -> None:
+    """
+    Sets up all project needed folders.
+    """
+    setup_folder(app.config['UPLOAD_FOLDER'])
+
+setup_folders()
 
 
-@app.route('/prioritize', methods=['POST'])
-def funcionalidade_pagina():
-    prog_v = request.form['subject']
-    entity = request.form['entity']
-    algname = request.form['algorithm']
-    repeats = int(request.form['repetitions'])
-    return fast_prioritize(prog_v, entity, algname, repeats)
+@app.route('/upload', methods=['POST'])
+def upload_files():
+    response_object = {'status': 'success'}
+    files = request.files.getlist('file[]', None)
+    setup_folder(app.config['UPLOAD_FOLDER'])
+    for uploaded_file in files:
+        uploaded_file.save(os.path.join(app.config['UPLOAD_FOLDER'], uploaded_file.filename))
+    response_object['message'] = 'Files successfully uploaded!'
+    return jsonify(response_object)
 
 
 @app.route('/fastprioritize', methods=['GET', 'POST'])
@@ -37,22 +69,20 @@ def submit_prioritize():
     if request.method == 'POST':
         post_data = request.get_json()
 
-        prog_v = post_data.get('subject')
         entity = post_data.get('entity')
-        algname = post_data.get('algorithm')
+        algorithm_name = post_data.get('algorithm')
         repeats = post_data.get('repetitions')
 
-        print(prog_v, entity, algname, repeats)
 
-        response_object['message'] = f'{prog_v}, {entity}, {algname}, {repeats}'
-        # fast_prioritize(prog_v, entity, algname, repeats)
+        response_object['message'] = f'{prog_v}, {entity}, {algorithm_name}, {repeats}'
+        # fast_prioritize(prog_v, entity, algorithm_name, repeats)
     return jsonify(response_object)
 
 
-def fast_prioritize(prog_v, entity, algname, repeats):
-    prog, v = prog_v.split("_")
+def fast_prioritize(prog_v, entity, algorithm_name, repeats):
+    prog, v = prog_v.split('_')
 
-    directory = "output/{}_{}/".format(prog, v)
+    directory = f'output/{prog}_{v}/'
     if not os.path.exists(directory):
         os.makedirs(directory)
     directory += "prioritized/"
@@ -63,16 +93,16 @@ def fast_prioritize(prog_v, entity, algname, repeats):
     k, n, r, b = 5, 10, 1, 10
 
     # FAST-f sample size
-    if algname == "FAST-all":
+    if algorithm_name == 'FAST-all':
         def all_(x): return x
         selsize = all_
-    elif algname == "FAST-sqrt":
+    elif algorithm_name == 'FAST-sqrt':
         def sqrt_(x): return int(math.sqrt(x)) + 1
         selsize = sqrt_
-    elif algname == "FAST-log":
+    elif algorithm_name == 'FAST-log':
         def log_(x): return int(math.log(x, 2)) + 1
         selsize = log_
-    elif algname == "FAST-one":
+    elif algorithm_name == 'FAST-one':
         def one_(x): return 1
         selsize = one_
     else:
@@ -83,9 +113,9 @@ def fast_prioritize(prog_v, entity, algname, repeats):
     sys.stdout = io.StringIO()
 
     if entity == "bbox":
-        prioritize.bboxPrioritization(algname, prog, v, entity, k, n, r, b, repeats, selsize)
+        prioritize.bboxPrioritization(algorithm_name, prog, v, entity, k, n, r, b, repeats, selsize)
     else:
-        prioritize.wboxPrioritization(algname, prog, v, entity, n, r, b, repeats, selsize)
+        prioritize.wboxPrioritization(algorithm_name, prog, v, entity, n, r, b, repeats, selsize)
 
     output = sys.stdout.getvalue()
     sys.stdout = stdout

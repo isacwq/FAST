@@ -1,21 +1,31 @@
 <template>
 <div id="app">
-
- <h3>Enter your Data</h3>
-    <b-form @submit="submit">
-      <b-form-group id="input-group-1" label="Subject" label-for="input-1">
-        <b-form-textarea
-          id="input-1"
-          type="text"
-          v-model="fastprioritize.subject"
-          placeholder="Enter the subject"
-        ></b-form-textarea>
+  <h3>Fill the prioritization form</h3>
+    <b-form @submit.prevent="submit">
+      <b-form-group id="input-group-1" label="Test Folder">
+        <b-form-file
+          no-traverse
+          directory
+          multiple
+          v-model="subject"
+          v-on:change="uploadFiles($event)"
+          placeholder="Choose the test folder or drop it here..."
+          drop-placeholder="Drop the test folders here..."
+          accept=".java"
+        >
+          <template slot="file-name" slot-scope="{ names }">
+            <b-badge variant="dark">{{ names[0] }}</b-badge>
+            <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
+              + {{ names.length - 1 }} More files
+            </b-badge>
+          </template>
+        </b-form-file>
       </b-form-group>
 
       <b-form-group id="input-group-2" label="Entity" label-for="input-2">
         <b-form-select 
           id="input-2"
-          v-model="fastprioritize.entity"
+          v-model="entity"
         >
           <option disabled value="">Please select one</option>
           <option>bbox</option>
@@ -28,7 +38,7 @@
       <b-form-group id="input-group-2" label="Algorithm" label-for="input-3">
         <b-form-select
           id="input-3"
-          v-model="fastprioritize.algorithm"
+          v-model="algorithm"
         >
           <option disabled value="">Please select one</option>
           <option>FAST-pw</option>
@@ -50,13 +60,21 @@
         <b-form-textarea
           id="input-4"
           type="number"
-          v-model.number="fastprioritize.repetitions"
+          v-model.number="repetitions"
           placeholder="Enter the repetitions"
           
-        ></b-form-textarea>
+        />
       </b-form-group>
 
-    <b-button pill v-on:Click="submit" id="button-1" type="submit" variant="dark">Execute</b-button>
+    <b-button
+      pill
+      v-on:Click.prevent="submit"
+      id="button-1"
+      type="submit"
+      variant="dark"
+    >
+      Execute
+    </b-button>
      
   </b-form>
     
@@ -64,35 +82,60 @@
 
 </template>
 <script>
-import axios from 'axios';
-export default{
+import axios from 'axios'
+
+const client = axios.create({ baseURL: 'http://127.0.0.1:3000' })
+
+export default {
  
-  data(){
+  data () {
     return {
-       fastprioritize:{
-        subject:"",
-        entity:"",
-        algorithm:"",
-        repetitions:1,
-      },
-    };
+      subject: [],
+      entity: "",
+      algorithm: "",
+      repetitions: 1,
+    }
   },
-  methods:{
-    submit:function(){
-      const path = 'http://127.0.0.1:3000/fastprioritize'
-      axios.post(path, {
-        subject:this.fastprioritize.subject,
-        entity:this.fastprioritize.entity,
-        algorithm:this.fastprioritize.algorithm,
-        repetitions:this.fastprioritize.repetitions,
+  methods: {
+    uploadFiles: function (event) {
+      const path = '/upload'
+
+      const formData = new FormData()
+      const files = event.target.files
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append('file[]', files[i], files[i].name)
+      }
+
+      client.post(path, formData)
+      .then(response => {
+        console.log(response)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    },
+
+    submit: function () {
+      const path = '/fastprioritize'
+      console.log(this.subject)
+      console.log(this.entity)
+      console.log(this.algorithm)
+      console.log(this.repetitions)
+
+      client.post(path, {
+        subject: this.subject,
+        entity: this.entity,
+        algorithm: this.algorithm,
+        repetitions: this.repetitions,
         }
       )
       .then(response => {
-        console.log(response);
+        console.log(response)
       })
-      .catch(err =>{
-        console.log(err);
-      });
+      .catch(err => {
+        console.log(err)
+      })
     },
   }
 }
