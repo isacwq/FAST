@@ -1,16 +1,16 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import Fastview from '../components/Fastview.vue';
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Fastview from '@/components/Fastview.vue'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 export default new VueRouter({
-  mode:'history',
-  routes:[
+  mode: 'history',
+  routes: [
     {
-      path:'/',
-      name:'Fastview',
-      component: Fastview,
-    },
-  ],
+      path: '/',
+      name: 'Fastview',
+      component: Fastview
+    }
+  ]
 })
