@@ -245,13 +245,7 @@ def parameterizer(projectPath, entity):
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Wrong input.")
-        print(usage)
-        exit()
-    projectPath, algname = sys.argv[1:]
-
+def run_prioritize(projectPath, algname):
     algnames = {"FAST-pw", "FAST-one", "FAST-log", "FAST-sqrt", "FAST-all"}
     entities = {"bbox", "function", "branch", "line"}
 
@@ -297,3 +291,12 @@ if __name__ == "__main__":
         bboxPrioritization(algname, projectPath, v, entity, k, n, r, b, repeats, selsize)
     else:
         print('No modifications were found in the project tests')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Wrong input.")
+        print(usage)
+        exit()
+    projectPath, algname = sys.argv[1:]
+    run_prioritize(projectPath, algname)
