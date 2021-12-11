@@ -46,7 +46,7 @@ def bboxPrioritization(name, projectPath, v, ctype, k, n, r, b, repeats, selsize
     inpath = "{}/.fast/input".format(projectPath)
     fin = "{}/{}-{}.txt".format(inpath, prog, ctype)
     outpath = "{}/.fast/output".format(projectPath)
-    ppath = outpath + "prioritized/"
+    ppath = outpath + "/prioritized/"
 
     if name == "FAST-" + selsize.__name__[:-1]:
         if ("{}-{}.tsv".format(name, ctype)) not in set(os.listdir(outpath)):
@@ -101,7 +101,8 @@ def bboxPrioritization(name, projectPath, v, ctype, k, n, r, b, repeats, selsize
 
 
 def writePrioritization(path, name, ctype, run, prioritization):
-    fout = "{}/{}-{}-{}.pickle".format(path, name, ctype, run+1)
+    print(path)
+    fout = "{}{}-{}-{}.pickle".format(path, name, ctype, run+1)
     pickle.dump(prioritization, open(fout, "wb"))
 
 def writePrioritizationFiles(inputPath, prioritizedPath, name, ctype, run, prioritization):
@@ -124,13 +125,13 @@ def writePrioritizationFiles(inputPath, prioritizedPath, name, ctype, run, prior
 
 def createPriorizationFile(prioritizedPath, projectName, ctype, run):
 
-    header = '''package fast;\n\nimport org.junit.platform.runner.JUnitPlatform;\nimport org.junit.platform.suite.api.SelectClasses;\nimport org.junit.runner.RunWith;\n\n'''
+    header = '''import org.junit.platform.runner.JUnitPlatform;\nimport org.junit.platform.suite.api.SelectClasses;\nimport org.junit.runner.RunWith;\n\n'''
 
     midle = '''\n@RunWith(JUnitPlatform.class)\n@SelectClasses({\n'''
 
     footer = '''})\nclass FASTPrioritizedSuite{}'''
 
-    fastTestPackage = '{}/../../../src/test/java/fast'.format(prioritizedPath)
+    fastTestPackage = '{}/../../../prioritized'.format(prioritizedPath)
 
     createFolderIfNotExists(fastTestPackage)
 
@@ -227,7 +228,7 @@ def parameterizer(projectPath, entity):
     projectName = getProjectName(projectPath)
     fileName = f"{projectPath}/.fast/input/{projectName}-{entity}.txt"
     indexTestFilesPaths = f"{projectPath}/.fast/input/{projectName}-indexTestFilesPaths.txt"
-    arr = getTestFilesFromProject(f'{projectPath}/**/src/test/java')
+    arr = getTestFilesFromProject(f'{projectPath}')
 
     for fileTest in arr:
 
