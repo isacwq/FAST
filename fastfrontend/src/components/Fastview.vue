@@ -7,7 +7,6 @@
         label="Test Folder"
       >
         <b-form-file
-          v-model="subject"
           no-traverse
           directory
           multiple
@@ -100,14 +99,25 @@
       </b-form-group>
 
       <b-button
-        id="button-1"
+        id="execute-button"
         pill
         type="submit"
         variant="dark"
-        @Click.prevent="submit"
+        @Click.prevent="submit()"
       >
         Execute
       </b-button>
+
+      <a
+        id="download-button"
+        ref="download_button"
+        target="_blank"
+        :style="downloadButtonStyle"
+        href=""
+        @Click.prevent="downloadSuite()"
+      >
+        {{ downloadAvailableText }}
+      </a>
     </b-form>
   </div>
 </template>
@@ -119,15 +129,30 @@ const client = axios.create({ baseURL: 'http://127.0.0.1:3000' })
 export default {
   data () {
     return {
-      subject: [],
+      downloadAvailable: false,
       entity: '',
       algorithm: '',
       repetitions: 1
     }
   },
+  computed: {
+    downloadAvailableText () {
+      return this.downloadAvailable ? 'Download Suite' : 'Execute to download the Suite'
+    },
+    downloadButtonStyle () {
+      if (!this.downloadAvailable) {
+        return {
+          'pointer-events': 'none'
+        }
+      }
+      return {}
+    }
+  },
   methods: {
     uploadFiles: function (event) {
       const path = '/upload'
+
+      this.downloadAvailable = false
 
       const formData = new FormData()
       const files = event.target.files
@@ -147,22 +172,26 @@ export default {
 
     submit: function () {
       const path = '/fastprioritize'
-      console.log(this.subject)
-      console.log(this.entity)
-      console.log(this.algorithm)
-      console.log(this.repetitions)
 
       client.post(path, {
         entity: this.entity,
         algorithm: this.algorithm,
         repetitions: this.repetitions
-      })
+      }, { responseType: 'blob' })
         .then(response => {
-          console.log(response)
+          this.downloadAvailable = true
+          const downloadFile = new Blob([response.data])
+          const link = this.$refs.download_button
+          link.href = window.URL.createObjectURL(downloadFile)
+          link.setAttribute('download', 'FASTPrioritizedSuite.java')
         })
         .catch(err => {
           console.log(err)
         })
+    },
+
+    downloadSuite () {
+      this.downloadLink.click()
     }
   }
 }
@@ -197,8 +226,11 @@ h3 {
   padding-left:80px;
   font-weight:bold;
 }
-#button-1 {
-margin-left:50%;
+#execute-button {
+  margin-left: 45%;
+}
+#download-button {
+  margin-left: 10px;
 }
 .nav-bar {
   padding-left: 50px;;

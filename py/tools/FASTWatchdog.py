@@ -32,6 +32,9 @@ def getTestFilesFromProject(projectPath):
     arr.extend(glob.glob(f'{projectPath}/**/*Test.java', recursive=True))
     arr.extend(glob.glob(f'{projectPath}/**/*Tests.java', recursive=True))
     arr.extend(glob.glob(f'{projectPath}/**/*TestCase.java', recursive=True))
+    arr.extend(glob.glob(f'{projectPath}/*Test.java', recursive=True))
+    arr.extend(glob.glob(f'{projectPath}/*Tests.java', recursive=True))
+    arr.extend(glob.glob(f'{projectPath}/*TestCase.java', recursive=True))
     return arr
 
 def checkDeletedFile(projectPath):
@@ -43,7 +46,7 @@ def checkDeletedFile(projectPath):
         testFilesPaths = f2.readlines()
         f2.close()
 
-        testFilesFromProject = getTestFilesFromProject(projectPath+'/**/src/test/java')
+        testFilesFromProject = getTestFilesFromProject(projectPath)
 
         testFileDeletedBeforeLastExecution = False
 

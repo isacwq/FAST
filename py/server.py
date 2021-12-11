@@ -1,10 +1,10 @@
 import io
 import math
-import os
+import os, shutil
 import pathlib
 import sys
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, safe_join, send_file
 from flask_cors import CORS
 
 import prioritize
@@ -20,6 +20,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 app.config['ROOT_FOLDER'] = os.path.abspath(os.path.dirname(__file__))
 app.config['UPLOAD_FOLDER'] = f'{app.config["ROOT_FOLDER"]}/uploads'
+app.config['SUITE_FOLDER'] = f'{app.config["UPLOAD_FOLDER"]}/prioritized'
+app.config['SUITE_FILE'] = 'FASTPrioritizedSuite.java'
 
 
 def delete_folder_content(folder: pathlib.Path) -> None:
@@ -31,6 +33,8 @@ def delete_folder_content(folder: pathlib.Path) -> None:
         try:
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
         except Exception as exception:
             print(f'Failed to delete {file_path}. Reason: {exception}')
 
@@ -75,7 +79,9 @@ def submit_prioritize():
 
         response_object['message'] = f'{entity}, {algorithm_name}, {repeats}'
         prioritize.run_prioritize(app.config['UPLOAD_FOLDER'], algorithm_name)
-    return jsonify(response_object)
+        
+        safe_path = safe_join(app.config['SUITE_FOLDER'], app.config['SUITE_FILE'])
+    return send_file(safe_path)
 
 
 if __name__ == '__main__':
