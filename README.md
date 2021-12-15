@@ -44,6 +44,19 @@ In order to replicate the project follow these steps:
    pip install -r requirements.txt
    ```
 
+#### Setup Vue JS
+
+[Setup](.//fastfrontend/README.md)
+
+#### Usage
+
+   ```bash
+   python py/server.py
+   # and
+   cd fastfrontend
+   npm run serve
+   ```
+
 ### Perform prioritization with different FAST algorithms
 
 1. Execute the `prioritize.py` script
