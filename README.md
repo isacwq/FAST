@@ -24,12 +24,24 @@ In order to replicate the project follow these steps:
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/DinoSaulo/FAST-parameterized
+   git clone https://github.com/isacwq/FAST.git
    ```
 
-2. Install the additional python packages required:
+2. Create an environment
    ```bash
-   pip3 install -r requirements.txt
+   python3 -m venv .env
+   ```
+
+4. Activate the environment
+   ```bash
+   . .env/bin/activate
+   # or
+   source .env/bin/activate
+   ```
+
+3. Install the additional python packages required:
+   ```bash
+   pip install -r requirements.txt
    ```
 
 ### Perform prioritization with different FAST algorithms
